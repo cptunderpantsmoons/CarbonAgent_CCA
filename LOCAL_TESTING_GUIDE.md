@@ -1,329 +1,449 @@
-# ✅ Local Testing Complete - Ready for Railway!
+# Local Testing Guide - Praxis Agent Carbon Platform
 
-## 🎉 SUCCESS: All Core Systems Working Locally
+**Date**: March 16, 2026
+**Status**: ✅ Ready for Testing
+**Services Running**: 3/4 Core Services
 
-### What's Working Right Now
+## Current System Status
 
-**✅ Full Database Stack**
-- PostgreSQL 15 running and healthy
-- 18 tables created with proper schema
-- JWT authentication functions operational
-- Row-level security policies active
-- Admin user: `admin@example.com`
+### ✅ Services Running
 
-**✅ Complete API Layer**
-- PostgREST API fully functional
-- OpenAPI specification available
-- All endpoints accessible
-- Database connection successful
-- Authentication system ready
+| Service | Status | URL | Notes |
+|---------|--------|-----|-------|
+| **Praxis Agent Carbon** | ✅ Running | http://localhost:50080 | Main agent interface |
+| **PostgreSQL** | ✅ Healthy | localhost:5434 | Database service |
+| **PostgREST** | ✅ Running | http://localhost:5437 | API layer (unhealthy status OK) |
 
-**✅ Development Tools**
-- Adminer database UI available
-- Test automation scripts created
-- Comprehensive documentation
-- Monitoring and logging configured
+### ⚠️ Services Having Issues
 
----
+| Service | Status | Issue | Workaround |
+|---------|--------|-------|-----------|
+| **Swarm** | ❌ Failed | Container runtime error | Use Praxis Agent Carbon standalone |
 
-## 🚀 Quick Start Guide
+**Note**: Swarm (nanoclaw) requires Docker-in-Docker which has configuration issues. For initial testing, use Praxis Agent Carbon standalone which provides full agent functionality.
 
-### Start Local Environment
+## Quick Start Testing
+
+### 1. Access Praxis Agent Carbon WebUI
+
+**Open in Browser:**
+```
+http://localhost:50080
+```
+
+**What to Expect:**
+- Modern OS-style desktop interface
+- Terminal/chat interface in main window
+- Agent character walking around
+- System monitoring in System Monitor window
+
+**First Time Setup:**
+1. Click on **Settings** (⚙️ icon)
+2. Configure your LLM provider (OpenRouter, Anthropic, etc.)
+3. Set your API key
+4. Click **Save Config**
+5. Click **Restart Agent**
+
+### 2. Test Basic Agent Functionality
+
+**Open Terminal** (💬 icon) and try:
+
+```
+Hello! Can you help me?
+```
+
+**Expected Response:**
+- Agent should greet you
+- Offer assistance
+- Show real-time streaming response
+
+### 3. Test Code Execution
+
+```
+Write a Python script that prints "Hello, World!"
+```
+
+**Expected Response:**
+- Agent should create Python code
+- Execute it using code-execution skill
+- Show output: `Hello, World!`
+
+### 4. Test File Operations
+
+```
+Create a text file called test.txt with content "Testing file creation"
+```
+
+**Expected Response:**
+- Agent should create the file
+- Confirm file was created
+- Show file location
+
+### 5. Test System Monitoring
+
+**Open System Monitor** (📈 icon)
+
+**What to Check:**
+- CPU usage should be visible
+- Memory usage should be displayed
+- Service status should show healthy
+
+### 6. Test Email Service Control
+
+**Open Email Service** (📧 icon)
+
+**What to Check:**
+- Statistics display (processed, pending, trades)
+- Service control buttons work
+- Activity monitoring shows updates
+
+## Component Testing
+
+### Test Praxis Agent Carbon (Main Agent)
+
+**Test 1: Code Execution**
+```
+Execute this Python code:
+import pandas as pd
+df = pd.DataFrame({'A': [1, 2, 3]})
+print(df)
+```
+
+**Test 2: Web Search**
+```
+Search for "latest AI news 2026" and summarize
+```
+
+**Test 3: File Operations**
+```
+List all files in the current directory
+```
+
+**Test 4: Math & Logic**
+```
+What is 123 * 456 + 789?
+```
+
+### Test PostgreSQL Database
+
+**Connect to Database:**
 ```bash
-cd /media/emt7/backup/CarbonAgent
-docker-compose -f docker-compose.local.yml up -d
+docker exec -it praxis-postgres psql -U postgres -d praxis_agent_carbon
 ```
 
-### Run Tests
-```bash
-./test-local.sh
-```
-
-### Access Services
-- **PostgREST API**: http://localhost:5437
-- **Database Admin**: http://localhost:8888 (Adminer)
-- **PostgreSQL**: localhost:5436
-
-### Stop Services
-```bash
-docker-compose -f docker-compose.local.yml down
-```
-
----
-
-## 📊 Test Results Summary
-
-### ✅ All Tests Passing (16/16)
-```
-✓ PostgreSQL container running
-✓ PostgREST container running
-✓ Adminer container running
-✓ PostgreSQL accepting connections
-✓ Database exists
-✓ All tables created (18 tables)
-✓ Admin user created
-✓ JWT functions created
-✓ PostgREST API responding
-✓ OpenAPI specification available
-✓ Users endpoint accessible
-✓ Can query users table
-✓ Row-level security policies active
-✓ Anonymous role created
-✓ Authenticated role created
-✓ PostgREST connected to database
-```
-
----
-
-## 🔧 Fixes Applied During Testing
-
-### 1. PostgreSQL Configuration
-```conf
-# Fixed: Listen on all interfaces for Docker networking
-listen_addresses = '*'
-
-# Fixed: Disable file logging (Docker compatible)
-logging_collector = off
-```
-
-### 2. Database Schema
+**Run Queries:**
 ```sql
--- Fixed: Vector type compatibility
-embedding TEXT  -- was: VECTOR(1536)
+-- List all tables
+\dt
 
--- Fixed: INSERT syntax for admin user
-INSERT INTO ... SELECT ... WHERE NOT EXISTS
+-- Check database size
+SELECT pg_size_pretty(pg_database_size('praxis_agent_carbon'));
 
--- Added: PostgREST roles
-CREATE ROLE anon;
-CREATE ROLE authenticated;
+-- View recent activity
+SELECT * FROM pg_stat_activity WHERE datname = 'praxis_agent_carbon';
 ```
 
-### 3. Row-Level Security
-```sql
--- Fixed: RLS policies with safe parameter access
-current_setting('app.current_user_id', true)::UUID
-```
+### Test PostgREST API
 
-### 4. Port Configuration
-```yaml
-# Fixed: Avoid port conflicts
-PostgreSQL: 5436 (not 5432)
-PostgREST:  5437 (not 5432)
-Adminer:    8888 (not 8080)
-```
-
----
-
-## 🧪 Available API Tests
-
-### Test API Root
+**Test API Endpoint:**
 ```bash
 curl http://localhost:5437/
-# Returns: OpenAPI specification
+
+# Expected: OpenAPI specification JSON
 ```
 
-### Test Users Endpoint
+**Test Tables (if any exist):**
 ```bash
 curl http://localhost:5437/users
-# Returns: Array of users (includes admin)
 ```
 
-### Test Tables Endpoint
+## Integration Testing
+
+### Test 1: Agent → Database Integration
+
+**In Praxis Agent Carbon terminal:**
+```
+Save a memory with the text "PostgreSQL database is running on port 5434"
+```
+
+**Verify in Database:**
 ```bash
-curl http://localhost:5437/agent_configs
-curl http://localhost:5437/memories
-curl http://localhost:5437/swarm_groups
+docker exec -it praxis-postgres psql -U postgres -d praxis_agent_carbon
+SELECT * FROM memories ORDER BY created_at DESC LIMIT 1;
 ```
 
-### Test with Filters
+### Test 2: Agent → File System Integration
+
+**In Praxis Agent Carbon terminal:**
+```
+Create a file called integration_test.txt with content "Integration test successful"
+```
+
+**Verify File Exists:**
 ```bash
-curl "http://localhost:5437/users?email=eq.admin@example.com"
+docker exec praxis-agent-carbon ls -la /root/integration_test.txt
 ```
 
----
+### Test 3: Agent → API Integration
 
-## 🎯 Railway Deployment Readiness
-
-### ✅ Ready for Railway (90%)
-
-**Fully Tested Components:**
-- ✅ Database schema (production-ready)
-- ✅ PostgreSQL configuration (optimized)
-- ✅ PostgREST API (fully functional)
-- ✅ JWT authentication (working)
-- ✅ Row-level security (active)
-- ✅ Admin system (operational)
-
-**Minor Items:**
-- ⚠️ InsForge build (use pre-built or fix TypeScript)
-- ⚠️ Agent Zero (needs Docker socket config)
-- ⚠️ Swarm orchestration (needs Docker-in-Docker)
-
-### Railway Deployment Strategy
-
-**Option 1: Phased Deployment (Recommended)**
+**In Praxis Agent Carbon terminal:**
 ```
-Phase 1: Database + PostgREST ✅ READY
-Phase 2: Add Swarm orchestration
-Phase 3: Add Agent Zero framework
-Phase 4: Add InsForge backend
+Make a GET request to http://localhost:5437/ and show me the response
 ```
 
-**Option 2: Direct Deployment**
+**Expected:**
+- Agent should use curl or similar
+- Display JSON response
+- Show status code
+
+## Performance Testing
+
+### Test Agent Response Time
+
+**Run this query multiple times:**
 ```
-Use Railway's managed PostgreSQL
-Deploy PostgREST + API layer
-Add services incrementally
+What is 2 + 2?
 ```
 
+**Measure:**
+- Time to first token
+- Time to complete response
+- Should be < 5 seconds for simple queries
+
+### Test Code Execution Performance
+
+**Run:**
+```
+Execute: for i in range(1000000): pass
+```
+
+**Expected:**
+- Should complete in < 10 seconds
+- Show execution time
+- No memory errors
+
+### Test Memory Usage
+
+**Check container stats:**
+```bash
+docker stats praxis-agent-carbon --no-stream
+```
+
+**What to Look For:**
+- Memory usage should be reasonable (< 2GB)
+- CPU usage should be low when idle
+- No memory leaks over time
+
+## Troubleshooting
+
+### Issue: Agent Won't Respond
+
+**Check:**
+1. Is Praxis Agent Carbon running? `docker ps | grep praxis-agent-carbon`
+2. Is WebUI accessible? http://localhost:50080
+3. Are API keys configured? Check Settings
+4. Check agent logs: `docker logs praxis-agent-carbon --tail 50`
+
+**Solution:**
+```bash
+docker restart praxis-agent-carbon
+```
+
+### Issue: Database Connection Errors
+
+**Check:**
+```bash
+docker exec praxis-postgres pg_isready -U postgres
+```
+
+**Solution:**
+```bash
+docker restart praxis-postgres
+```
+
+### Issue: PostgREST Unhealthy
+
+**Note**: Unhealthy status is OK - PostgREST is running fine
+**Verify:**
+```bash
+curl http://localhost:5437/
+```
+
+**If not responding:**
+```bash
+docker restart praxis-postgrest-local
+```
+
+### Issue: Port Conflicts
+
+**Check What's Using Ports:**
+```bash
+netstat -tulpn | grep -E '(50080|5434|5437)'
+```
+
+**Solution:**
+- Stop conflicting services
+- Or change port mappings in docker-compose.unified.yml
+
+## Advanced Testing
+
+### Test 1: Multiple Concurrent Sessions
+
+1. Open http://localhost:50080 in multiple browser tabs
+2. Send different queries in each tab
+3. Verify all sessions work independently
+
+### Test 2: Large File Operations
+
+```
+Create a 10MB file with random data and calculate its MD5 hash
+```
+
+**Expected:**
+- Agent should handle large files
+- Complete operation without errors
+- Show correct MD5 hash
+
+### Test 3: Long-Running Tasks
+
+```
+Execute: import time; time.sleep(30); print("Done")
+```
+
+**Expected:**
+- Agent should handle timeout gracefully
+- Show progress updates
+- Complete after 30 seconds
+
+### Test 4: Error Handling
+
+```
+Execute: 1/0
+```
+
+**Expected:**
+- Agent should show error clearly
+- Not crash or hang
+- Suggest fix
+
+## Testing Checklist
+
+### Basic Functionality
+- [ ] WebUI loads at http://localhost:50080
+- [ ] Agent responds to greetings
+- [ ] Code execution works (Python)
+- [ ] File operations work
+- [ ] Web search works (if configured)
+- [ ] Settings can be changed
+- [ ] Agent restarts successfully
+
+### Database Operations
+- [ ] PostgreSQL is healthy
+- [ ] Can connect to database
+- [ ] Can query tables
+- [ ] Can insert data
+- [ ] Agent can save/load memories
+
+### API Integration
+- [ ] PostgREST responds to requests
+- [ ] API returns proper JSON
+- [ ] Agent can make HTTP requests
+- [ ] CORS headers are correct
+
+### Performance
+- [ ] Response time < 5 seconds for simple queries
+- [ ] Memory usage < 2GB
+- [ ] No memory leaks over time
+- [ ] Multiple concurrent sessions work
+
+### Error Handling
+- [ ] Invalid code shows clear errors
+- [ ] Network failures are handled gracefully
+- [ ] Database errors are reported clearly
+- [ ] Agent doesn't crash on errors
+
+## Next Steps
+
+### After Basic Testing Works
+
+1. **Configure LLM Provider**
+   - Get API key from OpenRouter, Anthropic, or other provider
+   - Add to Settings
+   - Test with complex queries
+
+2. **Test Advanced Features**
+   - Scheduler (create recurring tasks)
+   - Projects (create isolated workspaces)
+   - Skills (install custom skills)
+   - Backup/Restore (test data persistence)
+
+3. **Integration Testing**
+   - Test with external APIs
+   - Test with real workflows
+   - Test with large datasets
+   - Test with concurrent users
+
+4. **Performance Optimization**
+   - Monitor resource usage
+   - Optimize database queries
+   - Cache frequently used data
+   - Scale resources if needed
+
+## Getting Help
+
+### Documentation
+- `README.md` - Platform overview
+- `AGENTS.md` - Development guide
+- `COMPLETE_DEPLOYMENT_GUIDE.md` - Detailed deployment guide
+- `TROUBLESHOOTING.md` - Common issues and solutions
+
+### Component Docs
+- `agent-zero/README.md` - Praxis Agent Carbon
+- `nanoclaw/README.md` - Swarm
+- `insforge/README.md` - InsForge
+
+### Logs and Debugging
+
+**View Logs:**
+```bash
+# Praxis Agent Carbon
+docker logs praxis-agent-carbon -f
+
+# PostgreSQL
+docker logs praxis-postgres -f
+
+# PostgREST
+docker logs praxis-postgrest-local -f
+
+# Swarm (if running)
+docker logs praxis-swarm -f
+```
+
+**Check Service Status:**
+```bash
+docker-compose -f docker-compose.unified.yml ps
+```
+
+**Restart Services:**
+```bash
+docker restart praxis-agent-carbon
+docker restart praxis-postgres
+docker restart praxis-postgrest-local
+```
+
+## Summary
+
+✅ **Praxis Agent Carbon is ready for testing**
+✅ **Core services are running**
+✅ **Database is accessible**
+✅ **API layer is functional**
+
+⚠️ **Swarm has container runtime issues** (workaround: use Praxis Agent Carbon standalone)
+
+🎯 **Recommended**: Start with Praxis Agent Carbon testing, then add Swarm once container runtime issues are resolved.
+
 ---
 
-## 📁 Files Created for Testing
-
-### Docker Configuration
-1. `docker-compose.local.yml` - Local testing environment
-2. `docker-compose.unified.yml` - Full platform (original)
-3. `docker-compose.railway.yml` - Railway deployment
-
-### Database Files
-1. `deploy/docker-init/db/db-init.sql` - Complete schema
-2. `deploy/docker-init/db/jwt.sql` - JWT functions
-3. `deploy/docker-init/db/postgresql.conf` - Optimized config
-
-### Testing & Documentation
-1. `test-local.sh` - Automated test suite
-2. `LOCAL_TESTING_GUIDE.md` - This file
-3. `FINAL_TEST_REPORT.md` - Comprehensive test report
-4. `TROUBLESHOOTING.md` - Problem solving guide
-
----
-
-## 🔍 Service Details
-
-### PostgreSQL (localhost:5436)
-- **Version**: 15-alpine
-- **Database**: praxis_agent_carbon
-- **User**: postgres
-- **Password**: postgres
-- **Status**: Healthy
-
-### PostgREST API (http://localhost:5437)
-- **Version**: 12.2.12
-- **Schema**: public
-- **Auth**: JWT tokens
-- **Status**: Operational
-
-### Adminer (http://localhost:8888)
-- **Server**: postgres
-- **Username**: postgres
-- **Password**: postgres
-- **Database**: praxis_agent_carbon
-
----
-
-## 🚨 Common Issues & Solutions
-
-### Issue: Port Already in Use
-**Solution**: The script uses alternative ports (5436, 5437, 8888)
-
-### Issue: PostgREST Connection Failed
-**Solution**: PostgreSQL needs `listen_addresses = '*'` in config
-
-### Issue: Permission Denied
-**Solution**: Anon and authenticated roles need proper grants
-
-### Issue: Container Won't Start
-**Solution**: Check Docker logs and free disk space
-
----
-
-## 📝 Next Steps
-
-### Immediate (Today)
-1. ✅ Test local environment (COMPLETE)
-2. ✅ Verify all endpoints (COMPLETE)
-3. ✅ Document findings (COMPLETE)
-
-### Railway Deployment (This Week)
-1. Create Railway account
-2. Deploy PostgreSQL database
-3. Deploy PostgREST API
-4. Test authentication flow
-5. Add additional services
-
-### Future Enhancements
-1. Fix InsForge TypeScript build
-2. Configure Agent Zero
-3. Set up Swarm orchestration
-4. Add monitoring and logging
-5. Implement CI/CD pipeline
-
----
-
-## 🎓 Key Learnings
-
-### What We Fixed
-1. **Network Configuration** - PostgreSQL listening on localhost
-2. **Role Permissions** - PostgREST needed anon/authenticated roles
-3. **Schema Compatibility** - Vector type not available, used TEXT
-4. **Port Conflicts** - Used alternative ports for local testing
-5. **RLS Policies** - Added safe parameter access
-
-### What We Learned
-1. Docker networking requires PostgreSQL to listen on `*`
-2. PostgREST needs specific database roles configured
-3. Row-level security requires careful parameter handling
-4. Port conflicts are common in local development
-5. Database initialization scripts must be idempotent
-
----
-
-## ✅ Validation Checklist
-
-Before Railway deployment, confirm:
-
-- [x] Database schema tested locally
-- [x] API endpoints functional
-- [x] Authentication system working
-- [x] Admin user can be created
-- [x] Row-level security active
-- [x] PostgREST API accessible
-- [x] OpenAPI specification available
-- [x] Test automation script created
-- [x] Documentation complete
-- [x] Troubleshooting guide ready
-
----
-
-## 🎉 Conclusion
-
-**Status: LOCAL TESTING COMPLETE ✅**
-
-The Praxis Agent Carbon Platform's core infrastructure is fully functional and tested. All database operations, API endpoints, and authentication systems are working correctly.
-
-**Confidence for Railway Deployment: 90%**
-
-The platform is ready for Railway deployment with the following approach:
-1. Deploy database and API first (fully tested)
-2. Add orchestration layer (requires Docker config)
-3. Add agent framework (requires build fixes)
-4. Full platform integration
-
-**Local Environment Status: Production-Ready** ✅
-
----
-
-<div align="center">
-  <h2>✅ Ready for Railway Deployment!</h2>
-  <p>Core systems tested and validated locally</p>
-  <p>18 database tables • JWT authentication • REST API</p>
-  <p><strong>Next: Deploy to Railway Platform</strong></p>
-</div>
-
----
-
-**Test Date**: 2026-03-15
-**Test Environment**: Local Docker
-**Test Result**: ✅ **ALL TESTS PASSED**
-**Deployment Status**: ✅ **READY FOR RAILWAY**
+**Last Updated**: March 16, 2026
+**Testing Status**: Ready for Local Testing
+**Services Running**: 3/4 Core Services

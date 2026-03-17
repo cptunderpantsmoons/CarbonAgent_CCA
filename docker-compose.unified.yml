@@ -229,7 +229,7 @@ services:
   praxis-agent-carbon:
     build:
       context: ./agent-zero
-      dockerfile: DockerfileLocalMinimal
+      dockerfile: DockerfileLocal
       args:
         BRANCH: local
     image: praxis-agent-carbon:latest
@@ -237,7 +237,9 @@ services:
     volumes:
       - ./agent-zero:/git/agent-zero
       - ./agent-zero/docker/run/fs/:/root/
+      - /var/run/docker.sock:/var/run/docker.sock:rw
     ports:
+
       - "50080:80"
       - "22:22"
       - "9000-9009:9000-9009"
@@ -256,15 +258,13 @@ services:
     privileged: true  # Required for Docker-in-Docker to work properly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw  # Docker socket to spawn agent containers
-      - ./nanoclaw-package.json:/app/package.json  # Use nanoclaw's package.json
-      - ./nanoclaw:/app/source  # Source code
       - ./swarm-workspace/groups:/workspace/groups  # Group workspaces
       - ./swarm-workspace/global:/workspace/global  # Global workspace
       - ./swarm-workspace/extra:/workspace/extra  # Extra workspace
       - ./swarm-workspace/ipc:/workspace/ipc  # IPC communication
-      - swarm-node-modules:/app/node_modules  # Node modules volume
+
     ports:
-      - "3000:3000"  # Optional: for direct API access if needed
+      - "3001:3000"  # Optional: for direct API access if needed (changed from 3000 to avoid conflict)
     environment:
       - GROUP_FOLDER_PATH=/workspace/groups
       - GLOBAL_FOLDER_PATH=/workspace/global
